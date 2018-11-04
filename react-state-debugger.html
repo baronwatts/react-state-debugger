@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>React Comment Form</title>
+	<style>
+		.big{ font-size: 3rem; color: skyblue;}
+	</style>
+</head>
+<body>
+	<div id="test"></div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js"></script>
+	<script type='text/babel'>
+		// State = I OWN
+		// Props = handed down
+
+		var Content = React.createClass({
+		  //return your state
+		  getInitialState: function() {
+		    return {
+		      numToggles: 0
+		    }
+		  },
+
+		  //The _ means that it's not a native react function. 
+		  //Set your state inside the function & attach the function to the button click event
+
+		  _handleToggle: function() {
+		    this.setState({
+		      numToggles: this.state.numToggles + 1
+		    });
+		  },
+		  render: function() {
+		    var message = "Click Me";
+		    var numToggles = this.state.numToggles;
+		    return (
+		      <section>
+		        <h2 className="big"> Yo </h2>
+		        <div>{this.props.handedDown}</div>{/* value is set in the App component */}
+		        <p> I have been toggled {numToggles} times</p>
+		        <button onClick={this._handleToggle}>{message}</button>
+		        <p>State Debugger</p>
+		        <pre>{JSON.stringify(this.state, null, 2)}</pre>{/* custom debugger */}
+		      </section>
+		    );
+		  }
+		});
+
+		//returns the Content component
+		
+		var App = React.createClass({
+		  render: function() {
+		    return (
+		      <div>
+		        <Content handedDown = "foo"/>
+		        <Content handedDown = "baz"/>
+		      </div>
+		    );
+		  }
+		});
+
+		ReactDOM.render(<App />, document.getElementById("test"));
+	</script>
+</body>
+</html>
