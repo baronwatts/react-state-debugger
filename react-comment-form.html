@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>React Comment Form</title>
+	<style>
+	html {
+		  box-sizing: border-box;
+		}
+		*, *:before, *:after {
+		  box-sizing: inherit;
+		}
+		*{
+			font-family: Georgia;
+		}
+		::placeholder { 
+			font-size: 14px;
+		}
+		:-ms-input-placeholder {
+			font-size: 14px;
+		}
+		::-ms-input-placeholder {
+			font-size: 14px;
+		}
+		#main{
+		  max-width: 300px;
+		  width: 100%;
+		  margin: auto;
+		}
+		ul{
+		  display: flex;
+		  margin:0;
+		  padding:0;
+		}
+
+		p{
+			margin: 0;
+		}
+		form{
+		  margin-top: 60px;
+		}
+		form > *{
+		  display: block;
+		  width: 100%;
+		  margin: 10px 0 0;
+		}
+		form input, form textarea{
+			border: 1px solid #ccc;
+			resize: none;
+			border-radius: 5px;
+			padding: 5px;
+		}
+		form button{
+		  background: #756ff1;
+		  border:none;
+		  color: white;
+		  padding: 10px 0;
+		  border-radius: 5px;
+		  margin-bottom: 50px;
+		}
+		section .flex{
+		  display: flex;
+		  width: 100%;
+		  margin-bottom: 20px;
+		}
+		section.comment img{
+		  border-radius: 50%;
+		  width: 50px; height: 50px;
+		  display:inline-block;
+		  margin:0 5px;
+		}
+		li{
+			list-style: none;
+		}
+		li:nth-child(even) .flex{
+			flex-direction: row-reverse;
+			text-align: right;
+		}
+		.bubble{
+			margin-top: 20px;
+			 box-shadow: 0 3px 6px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.15);
+			padding: 10px 25px;
+		}
+		.author{
+			font-size: 12px;
+			opacity: .5;
+			padding-top: 10px;
+			text-transform: lowercase;
+		}
+		.pre{
+			width: 300px;
+			overflow: auto;
+		}
+	</style>
+</head>
+<body>
+	<div id="main"></div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js"></script>
+	<script type='text/babel'>
+		var h = {
+		    getTime: function() {
+		      var month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+		      var d = new Date();
+		      var mon = month[d.getMonth()];
+		      var day = d.getDate();
+		      var year = d.getFullYear();
+		      var dateAll = mon + " " + day + ", " + year;
+		      return dateAll;
+		    }
+		  }
+		  //================================================= Comment form component
+		var AddCommentForm = React.createClass({
+		  processComment: function(e) {
+		    e.preventDefault();
+		    //================================================= 1. Take data from form
+		    var commentData = {
+		        commentName: this.refs.name.value,
+		        commentBody: this.refs.desc.value
+		      }
+		      //================================================= 2. Pass data back to App
+		    this.props.addMyComment(commentData);
+		    //================================================= 3. Reset the form
+		    this.refs.commentForm.reset();
+
+		  },
+		  render: function() {
+		    return (
+		      <section>
+		        <form ref="commentForm" onSubmit={this.processComment}>
+		          <textarea ref="desc" placeholder="Write something"/>
+		          <input type="text" ref="name" placeholder="Your Name"/>
+		          <button>Add Comment</button>
+		        </form>
+		      </section>
+		    )
+		  }
+		});
+
+		//================================================= New comment component
+		var NewComment = React.createClass({
+		  render: function() {
+		    return (
+		      <section className="comment">
+		        <ul>
+		          <li>
+		            <div className="flex">
+		              <img src="http://placehold.it/50x50" />
+		              <div className="bubble">
+		              	<p>{this.props.details.commentBody}</p>
+		        		<p className="author"><span>{this.props.details.commentName}</span><span>&nbsp;&nbsp;&nbsp; {h.getTime()}</span></p>
+		              </div>
+		             </div>
+		            
+		          </li>
+		        </ul>
+		        
+		      </section>
+		    )
+		  }
+		});
+
+		//================================================= App component - renders all components
+		var App = React.createClass({
+		  //================================================= keep track of state
+		  getInitialState: function() {
+		    return {
+		      comments: {}
+		    }
+		  },
+		  //================================================= places the commentData object inside addComment. Then set the state
+		  addComment: function(commentData) {
+		    //================================================= TS will be the unique id to prevent overidding new comments
+		    var TS = (new Date()).getTime();
+		    //================================================= Add comment-id as a property
+		    this.state.comments['comment-id' + TS] = commentData;
+		    this.setState({
+		      comments: this.state.comments
+		    });
+		  },
+		  //================================================= renderComment is passed in the .map function
+		  renderComment: function(key) {
+		    return (
+		      //================================================= key, index, details are props
+		      //================================================= deatils props has access to to the commentData
+		      <li>
+		         <NewComment key={key} index={key} details={this.state.comments[key]}/>
+		       </li>
+		    )
+		  },
+		  render: function() {
+		    return (
+		      <div>
+		        {
+		          //================================================= use .map to iterate over state
+		          Object
+		            .keys(this.state.comments)
+		            .map(this.renderComment)
+		        }
+		        {
+		          //================================================= addMyComment is a prop of AddCommentForm
+		          //================================================= commentData was passed inside addMyComment function 
+		        }
+		        <AddCommentForm addMyComment={this.addComment}/>
+		        <p>State Debugger</p>
+		        <div className="pre"><pre>{JSON.stringify(this.state, null, 2)}</pre></div>
+		      </div>
+		    )
+		  }
+		});
+
+		ReactDOM.render(<App />, document.getElementById('main'));
+	</script>
+</body>
+</html>
